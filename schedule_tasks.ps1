@@ -2,7 +2,7 @@ Add-Content -Path "$env:USERPROFILE\push_scheduler_log.txt" -Value "[$(Get-Date)
 
 # === CONFIG ===
 $scriptPath = "C:\Users\itai\Desktop\whitespace-pusher\auto_commit.sh"  # UPDATE IF NEEDED
-$numTasks = Get-Random -Minimum 3 -Maximum 6  # Schedule 3 to 5 times
+$numTasks = Get-Random -Minimum 0 -Maximum 6  # Schedule 3 to 5 times
 
 # Remove old scheduled tasks (optional cleanup)
 Get-ScheduledTask | Where-Object { $_.TaskName -like "WhitespacePush*" } | Unregister-ScheduledTask -Confirm:$false
