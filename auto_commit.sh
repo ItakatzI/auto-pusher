@@ -25,14 +25,13 @@ if [ -z "$REPO_DIR" ] || [ -z "$TARGET_FILE" ]; then
 fi
 
 cd "$REPO_DIR" || { echo "[✘] Failed to cd into $REPO_DIR"; exit 1; }
-
-MIN_COMMITS=0
+Y
 MAX_COMMITS=2
 NUM_COMMITS=$(( RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS ))
 
 echo "[✔] Planning $NUM_COMMITS motivational commits..."
 
-for ((i=0; i<NUM_COMMITS; i++)); do
+for ((i=0; i<NUM_COMMITS; i++)); dogit 
   echo "[→] Commit $((i+1)) of $NUM_COMMITS"
 
   # Fetch a quote
