@@ -5,7 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_PATH="$SCRIPT_DIR/.env"
 LOG_PATH="$SCRIPT_DIR/push_log.txt"
 
-exec >> "$LOG_PATH" 2>&1  # Log stdout and stderr
+# Log to both file and terminal
+exec > >(tee -a "$LOG_PATH") 2>&1
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting auto_commit.sh"
 
@@ -58,6 +59,13 @@ for ((i=0; i<NUM_COMMITS; i++)); do
   git add "$TARGET_FILE"
   git commit -m "Motivation: \"$CLEAN_QUOTE\" ($(date '+%Y-%m-%d %H:%M:%S'))"
   git push
+  echo "[💬] $CLEAN_QUOTE"
+
+  # Escape for PowerShell
+  ESCAPED_QUOTE=$(echo "$CLEAN_QUOTE" | sed "s/'/''/g")
+
+  # Windows notification (requires BurntToast module)
+  powershell.exe -Command "New-BurntToastNotification -Text 'Motivational Commit', '$ESCAPED_QUOTE'"
 done
 
 echo "[✔] Completed $NUM_COMMITS commits."

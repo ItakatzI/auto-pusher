@@ -61,7 +61,7 @@ for ($i = 0; $i -lt $numTasks; $i++) {
     $taskName = "WhitespacePush_$i"
 
     # Properly escaped Bash command
-    $bashCommand = "-c `"cd '$repoDir' && bash ./auto_commit.sh >> '$logFile' 2>&1`""
+    $bashCommand = "-c `"cd '$repoDir' && bash ./auto_commit.sh | tee -a '$logFile'`""
 
     $action = New-ScheduledTaskAction -Execute $bashPath -Argument $bashCommand
     $trigger = New-ScheduledTaskTrigger -Daily -At $time
