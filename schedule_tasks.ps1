@@ -41,4 +41,4 @@ for ($i = 0; $i -lt $numTasks; $i++) {
     Register-ScheduledTask -Action $action -Trigger $trigger -TaskName $taskName -Description "Random whitespace push" -Force
 }
 
-Write-Output "[V] $numTasks push tasks scheduled at random times today."
+Write-Output "[✔] $numTasks push tasks scheduled at random times today."
