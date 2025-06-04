@@ -23,7 +23,7 @@ Load-EnvFile
 $scriptPath = Join-Path $env:REPO_DIR "auto_commit.sh"
 
 # --- Config ---
-$numTasks = Get-Random -Minimum 3 -Maximum 6  # Schedule 3 to 5 tasks
+$numTasks = Get-Random -Minimum 0 -Maximum 6  # Schedule 0 to 5 tasks
 
 # --- Clean up previous tasks ---
 Get-ScheduledTask | Where-Object { $_.TaskName -like "WhitespacePush_*" } | Unregister-ScheduledTask -Confirm:$false
