@@ -1,7 +1,15 @@
 #!/bin/bash
 
+# === Config ===
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_PATH="$SCRIPT_DIR/.env"
+LOG_PATH="$SCRIPT_DIR/push_log.txt"
+
+exec >> "$LOG_PATH" 2>&1  # Log stdout and stderr
+
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting auto_commit.sh"
+
 # === Load .env ===
-ENV_PATH="$(dirname "$0")/.env"
 if [ -f "$ENV_PATH" ]; then
   export $(grep -v '^#' "$ENV_PATH" | xargs)
 else
@@ -21,25 +29,35 @@ MIN_COMMITS=0
 MAX_COMMITS=5
 NUM_COMMITS=$(( RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS ))
 
-echo "[✔] Starting $NUM_COMMITS motivational commits..."
+echo "[✔] Planning $NUM_COMMITS motivational commits..."
 
 for ((i=0; i<NUM_COMMITS; i++)); do
+  echo "[→] Commit $((i+1)) of $NUM_COMMITS"
+
   # Fetch a quote
   RESPONSE=$(curl -s https://zenquotes.io/api/random)
 
-  # Extract and clean
-  RAW_QUOTE=$(echo "$RESPONSE" | grep -oP '"q":"\K[^"]+')
-  RAW_AUTHOR=$(echo "$RESPONSE" | grep -oP '"a":"\K[^"]+')
+  if [ -z "$RESPONSE" ]; then
+    echo "[!] Failed to fetch quote, skipping..."
+    continue
+  fi
 
-  # Sanitize: convert to ASCII-safe
+  # Extract and sanitize quote
+  RAW_QUOTE=$(echo "$RESPONSE" | sed -n 's/.*"q":"\([^"]*\)".*/\1/p')
+  RAW_AUTHOR=$(echo "$RESPONSE" | sed -n 's/.*"a":"\([^"]*\)".*/\1/p')
+
+  if [ -z "$RAW_QUOTE" ] || [ -z "$RAW_AUTHOR" ]; then
+    echo "[!] Invalid quote structure, skipping..."
+    continue
+  fi
+
   CLEAN_QUOTE=$(echo "$RAW_QUOTE — $RAW_AUTHOR" | iconv -f utf-8 -t ascii//TRANSLIT | tr -cd '\11\12\15\40-\176')
 
-  # Append as comment
+  # Append and commit
   printf "# %s\n" "$CLEAN_QUOTE" >> "$TARGET_FILE"
-
   git add "$TARGET_FILE"
   git commit -m "Motivation: \"$CLEAN_QUOTE\" ($(date '+%Y-%m-%d %H:%M:%S'))"
   git push
 done
 
-echo "[✔] Done with $NUM_COMMITS motivational pushes."
+echo "[✔] Completed $NUM_COMMITS commits."
