@@ -51,7 +51,7 @@ Get-ScheduledTask | Where-Object { $_.TaskName -like "WhitespacePush_*" } | Unre
 $logFile = "$env:USERPROFILE\auto_commit_output.log"
 
 # --- Schedule new tasks ---
-$numTasks = Get-Random -Minimum 0 -Maximum 6
+$numTasks = Get-Random -Minimum 0 -Maximum 3
 $logFile = "$env:TEMP\push_log.txt"
 
 for ($i = 0; $i -lt $numTasks; $i++) {

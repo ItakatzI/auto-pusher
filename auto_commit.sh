@@ -27,7 +27,7 @@ fi
 cd "$REPO_DIR" || { echo "[✘] Failed to cd into $REPO_DIR"; exit 1; }
 
 MIN_COMMITS=0
-MAX_COMMITS=5
+MAX_COMMITS=2
 NUM_COMMITS=$(( RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS ))
 
 echo "[✔] Planning $NUM_COMMITS motivational commits..."
