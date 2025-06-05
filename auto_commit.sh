@@ -31,7 +31,7 @@ NUM_COMMITS=$(( RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS ))
 
 echo "[✔] Planning $NUM_COMMITS motivational commits..."
 
-for ((i=0; i<NUM_COMMITS; i++)); dogit 
+for ((i=0; i<NUM_COMMITS; i++)); do
   echo "[→] Commit $((i+1)) of $NUM_COMMITS"
 
   # Fetch a quote
