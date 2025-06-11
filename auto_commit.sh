@@ -54,9 +54,13 @@ for ((i=0; i<NUM_COMMITS; i++)); do
   CLEAN_QUOTE=$(echo "$RAW_QUOTE — $RAW_AUTHOR" | iconv -f utf-8 -t ascii//TRANSLIT | tr -cd '\11\12\15\40-\176')
 
   # Append and commit
+  git checkout -b "NewDailyQuote"
   printf "# %s\n" "$CLEAN_QUOTE" >> "$TARGET_FILE"
   git add "$TARGET_FILE"
   git commit -m "Motivation: \"$CLEAN_QUOTE\" ($(date '+%Y-%m-%d %H:%M:%S'))"
+  git checkout main
+  git merge NewDailyQuote
+  git branch -d NewDailyQuote
   git push
   echo "[💬] $CLEAN_QUOTE"
 
