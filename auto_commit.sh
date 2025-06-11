@@ -67,4 +67,4 @@ for ((i=0; i<NUM_COMMITS; i++)); do
   powershell.exe -Command "New-BurntToastNotification -Text 'Motivational Commit', '$ESCAPED_QUOTE'"
 done
 
-echo "[✔] Completed $NUM_COMMITS commits."
+echo "[✔] Completed $NUM_COMMITS commits." 
