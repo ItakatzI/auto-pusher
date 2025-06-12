@@ -4,6 +4,8 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_PATH="$SCRIPT_DIR/.env"
 LOG_PATH="$SCRIPT_DIR/push_log.txt"
+# state file to remember which repo was used last time
+LAST_REPO_FILE="$SCRIPT_DIR/.last_repo"
 
 # Log to both file and terminal
 exec > >(tee -a "$LOG_PATH") 2>&1
@@ -19,13 +21,33 @@ else
 fi
 
 # === Sanity Check ===
-if [ -z "$REPO_DIR" ] || [ -z "$TARGET_FILE" ]; then
-  echo "[✘] Missing REPO_DIR or TARGET_FILE in .env"
+if [ -z "$REPO_DIR" ] || [ -z "$REPO_ALT" ] || [ -z "$TARGET_FILE" ]; then
+  echo "[✘] Missing REPO_DIR, REPO_ALT or TARGET_FILE in .env"
   exit 1
 fi
 
-cd "$REPO_DIR" || { echo "[✘] Failed to cd into $REPO_DIR"; exit 1; }
-Y
+# === Choose which repo to use this run ===
+if [ -f "$LAST_REPO_FILE" ]; then
+  LAST=$(cat "$LAST_REPO_FILE")
+else
+  # default so that first run uses REPO_DIR
+  LAST="ALT"
+fi
+
+if [ "$LAST" = "ALT" ]; then
+  REPO="$REPO_DIR"
+  echo "DIR" > "$LAST_REPO_FILE"
+else
+  REPO="$REPO_ALT"
+  echo "ALT" > "$LAST_REPO_FILE"
+fi
+
+echo "[✔] Using repo: $REPO"
+
+cd "$REPO" || { echo "[✘] Failed to cd into $REPO"; exit 1; }
+
+# === Commit settings ===
+MIN_COMMITS=${MIN_COMMITS:-1}
 MAX_COMMITS=2
 NUM_COMMITS=$(( RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS ))
 
@@ -36,7 +58,6 @@ for ((i=0; i<NUM_COMMITS; i++)); do
 
   # Fetch a quote
   RESPONSE=$(curl -s https://zenquotes.io/api/random)
-
   if [ -z "$RESPONSE" ]; then
     echo "[!] Failed to fetch quote, skipping..."
     continue
@@ -45,7 +66,6 @@ for ((i=0; i<NUM_COMMITS; i++)); do
   # Extract and sanitize quote
   RAW_QUOTE=$(echo "$RESPONSE" | sed -n 's/.*"q":"\([^"]*\)".*/\1/p')
   RAW_AUTHOR=$(echo "$RESPONSE" | sed -n 's/.*"a":"\([^"]*\)".*/\1/p')
-
   if [ -z "$RAW_QUOTE" ] || [ -z "$RAW_AUTHOR" ]; then
     echo "[!] Invalid quote structure, skipping..."
     continue
@@ -62,13 +82,12 @@ for ((i=0; i<NUM_COMMITS; i++)); do
   git merge NewDailyQuote
   git branch -d NewDailyQuote
   git push
+
   echo "[💬] $CLEAN_QUOTE"
 
-  # Escape for PowerShell
-  ESCAPED_QUOTE=$(echo "$CLEAN_QUOTE" | sed "s/'/''/g")
-
   # Windows notification (requires BurntToast module)
+  ESCAPED_QUOTE=$(echo "$CLEAN_QUOTE" | sed "s/'/''/g")
   powershell.exe -Command "New-BurntToastNotification -Text 'Motivational Commit', '$ESCAPED_QUOTE'"
 done
 
-echo "[✔] Completed $NUM_COMMITS commits." 
+echo "[✔] Completed $NUM_COMMITS commits."
