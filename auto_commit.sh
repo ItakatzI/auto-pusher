@@ -45,10 +45,10 @@ fi
 echo "[✔] Using repo: $REPO"
 
 cd "$REPO" || { echo "[✘] Failed to cd into $REPO"; exit 1; }
-
+git pull
 # === Commit settings ===
 MIN_COMMITS=${MIN_COMMITS:-1}
-MAX_COMMITS=2
+MAX_COMMITS=2 
 NUM_COMMITS=$(( RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS ))
 
 echo "[✔] Planning $NUM_COMMITS motivational commits..."
