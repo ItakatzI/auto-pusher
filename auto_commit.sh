@@ -36,25 +36,28 @@ fi
 
 if [ "$LAST" = "ALT" ]; then
   REPO="$REPO_DIR"
-  echo "DIR" > "$LAST_REPO_FILE"
+  echo "DIR" >"$LAST_REPO_FILE"
 else
   REPO="$REPO_ALT"
-  echo "ALT" > "$LAST_REPO_FILE"
+  echo "ALT" >"$LAST_REPO_FILE"
 fi
 
 echo "[✔] Using repo: $REPO"
 
-cd "$REPO" || { echo "[✘] Failed to cd into $REPO"; exit 1; }
+cd "$REPO" || {
+  echo "[✘] Failed to cd into $REPO"
+  exit 1
+}
 git pull
 # === Commit settings ===
 MIN_COMMITS=${MIN_COMMITS:-1}
-MAX_COMMITS=2 
-NUM_COMMITS=$(( RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS ))
+MAX_COMMITS=2
+NUM_COMMITS=$((RANDOM % (MAX_COMMITS - MIN_COMMITS + 1) + MIN_COMMITS))
 
 echo "[✔] Planning $NUM_COMMITS motivational commits..."
 
-for ((i=0; i<NUM_COMMITS; i++)); do
-  echo "[→] Commit $((i+1)) of $NUM_COMMITS"
+for ((i = 0; i < NUM_COMMITS; i++)); do
+  echo "[→] Commit $((i + 1)) of $NUM_COMMITS"
 
   # Fetch a quote
   RESPONSE=$(curl -s https://zenquotes.io/api/random)
@@ -75,7 +78,7 @@ for ((i=0; i<NUM_COMMITS; i++)); do
 
   # Append and commit
   git checkout -b "NewDailyQuote"
-  printf "# %s\n" "$CLEAN_QUOTE" >> "$TARGET_FILE"
+  printf "# %s\n" "$CLEAN_QUOTE" >>"$TARGET_FILE"
   git add "$TARGET_FILE"
   git commit -m "Motivation: \"$CLEAN_QUOTE\" ($(date '+%Y-%m-%d %H:%M:%S'))"
   git checkout main
@@ -87,7 +90,9 @@ for ((i=0; i<NUM_COMMITS; i++)); do
 
   # Windows notification (requires BurntToast module)
   ESCAPED_QUOTE=$(echo "$CLEAN_QUOTE" | sed "s/'/''/g")
-  powershell.exe -Command "New-BurntToastNotification -Text 'Motivational Commit', '$ESCAPED_QUOTE'"
+
+  powershell.exe -Command "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms') | Out-Null; [System.Windows.Forms.MessageBox]::Show('$ESCAPED_QUOTE','Motivation')"
+
 done
 
 echo "[✔] Completed $NUM_COMMITS commits."
